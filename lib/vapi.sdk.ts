@@ -1,2 +1,2 @@
 import Vapi from '@vapi-ai/web';
-const vapi = new Vapi('process.env.NEXT_PUBLIC_VAPI_WEB_TOKEN!');
+export const vapi = new Vapi('c52cf408-e6c0-4066-b6cb-e942b3fecaa1');
