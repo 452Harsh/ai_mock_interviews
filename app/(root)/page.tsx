@@ -12,13 +12,11 @@ import React from "react";
 
 const page = async () => {
   const user = await getCurrentUser();
-  console.log(user!.id);
   const [userInterview, latestInterview] = await Promise.all([
     await getInterviewByUserId(user?.id!),
     await getLateshInterview({ userId: user?.id! }),
   ]);
 
-  console.log(userInterview, latestInterview);
 
   const hasPastInterview = userInterview && userInterview.length > 0;
   const hasUpcomingInterview = latestInterview && latestInterview.length > 0;

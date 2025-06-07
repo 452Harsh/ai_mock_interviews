@@ -4,10 +4,21 @@ import Image from 'next/image';
 import { getRandomInterviewCover } from '@/lib/utils';
 import Link from 'next/link';
 import DisplayTechIcons from './DisplayTechIcons';
+import { getFeedbackByInterviewId } from '@/lib/actions/general.action';
+import { getCurrentUser } from '@/lib/actions/auth.action';
+import { Button } from './ui/button';
 
-const InterviewCard = ({id ,userId, role,type, techstack,createdAt}:InterviewCardProps) => {
-    console.log(techstack);
-    const feedback = null as Feedback | null;
+const InterviewCard = async ({id ,role,type, techstack,createdAt}:InterviewCardProps) => {
+    const userId = await getCurrentUser();
+    const i = userId?.id || "";
+    const feedback = userId && id  ?
+    await getFeedbackByInterviewId({   
+        interviewId: id,
+       userId: i,
+    }) : null;
+    console.log("feedback", feedback);
+    console.log("userId" + userId?.id, id);
+   
     const normalizedType = /mix/gi.test(type) ? "Mixed" : type;
     const formatedDate = dayjs(feedback?.createdAt  || createdAt  || Date.now()).format("MMM D, YYYY");
   return (
@@ -33,10 +44,12 @@ const InterviewCard = ({id ,userId, role,type, techstack,createdAt}:InterviewCar
             </div>
             <div className='flex flex-row justify-between'>
                 <DisplayTechIcons techstack={techstack} />
-
-                <Link href={feedback ? `/interview/${id}/feedback` : `/interview/${id}`}>
+                <Button asChild className="btn-primary max-sm:w-full">
+                    <Link className='' href={feedback ? `/interview/${id}/feedback` : `/interview/${id}`}>
                     {feedback ? "Check Feedback" : "View Interview"}
                 </Link>
+                </Button>
+                
             </div>
         </div>
     </div>
