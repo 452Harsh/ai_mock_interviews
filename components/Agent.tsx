@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { vapi } from "@/lib/vapi.sdk";
+import { interviewer } from "@/constants";
 
 enum CallStatus {
   CONNECTING = "CONNECTING",
@@ -16,7 +17,7 @@ interface SavedMessage {
   content: string;
 }
 
-const Agent = ({ userName, userId, type, questions }: AgentProps) => {
+const Agent = ({ userName, userId, type, questions ,interviewId }: AgentProps) => {
   const router = useRouter();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
@@ -49,9 +50,29 @@ const Agent = ({ userName, userId, type, questions }: AgentProps) => {
       vapi.off("error", onError);
     };
   }, []);
+
+  const handleGenerateFeedback = async (message : SavedMessage[]) => {
+    console.log("Generating feedback with messages:", message);
+    const {success ,id } = {
+      success: true,
+      id : 'feedback-id'
+    }
+    if(success && id){
+      router.push(`/interview/${interviewId}/feedback`);
+    }else{
+      console.error("Failed to generate feedback");
+      router.push('/');
+    }
+  }
+
   useEffect(() => {
     if (callStatus === CallStatus.FINISHED) {
-      router.push("/");
+      if(type === "generate") {
+        router.push("/"); 
+      }
+      else{
+        handleGenerateFeedback(message);
+      }
     }
   }, [message, userId, type, callStatus]);
 
@@ -74,6 +95,11 @@ const Agent = ({ userName, userId, type, questions }: AgentProps) => {
           .map((question) => `- ${question}`)
           .join("\n");
       }
+      await vapi.start(interviewer, {
+        variableValues: {
+          questions: formattedQuestions,
+        },
+      });
     }
     
   };
